@@ -1,0 +1,20 @@
+#################################### common config : ####################################
+spring:
+  application:
+    name: simplechat
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+    mode: HTML
+    prefix: classpath:/templates/
+    servlet:
+      content-type: text/html
+
+
+server:
+  port: 8888
+  servlet:
+    context-path: /chat
+
+
+
