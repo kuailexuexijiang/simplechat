@@ -27,4 +27,9 @@ public class Constant {
      * 下线
      */
     public static final String MSG_TYPE_OFFLINE = "OFFLINE";
+
+    /**
+     * 心跳测试
+     */
+    public static final String MSG_TYPE_HEART_CHECK = "HEART_CHECK";
 }

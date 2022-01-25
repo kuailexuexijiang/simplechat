@@ -13,7 +13,7 @@
     <div class="container ">
         <div class="navbar-header">
             <a class="navbar-brand" href="#">
-                <span class="glyphicon glyphicon-th-large"></span >
+                <span class="glyphicon glyphicon-th-large"></span>
                 我的聊天室
             </a>
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
@@ -25,7 +25,7 @@
         <div class="collapse navbar-collapse" id="navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
                 <li class="disable">
-                    <a >
+                    <a>
                         <span class="glyphicon glyphicon-off"></span>&nbsp;&nbsp;
                         <span id="username"></span>
                     </a>
@@ -36,7 +36,7 @@
                     <input type="text" class="form-control " placeholder="请输入内容" id="chat">
                 </div>
                 <button type="button" class="btn btn-warning " id="sendMessage">发送</button>
-                <button type="button" class="btn btn-danger "  onclick="clean()">删除记录</button>
+                <button type="button" class="btn btn-danger " onclick="clean()">删除记录</button>
             </form>
 
         </div>
@@ -83,7 +83,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-info " data-target="#newname"
-                            onclick="savename()">保存</button>
+                            onclick="savename()">保存
+                    </button>
                 </div>
             </div>
         </div>
@@ -96,38 +97,40 @@
     let Onlineset = new Set();//维护在线人数的容器
     //开启webSocket连接
     function openSocket() {
-        if (typeof(WebSocket) == "undefined"){
+        if (typeof (WebSocket) == "undefined") {
             alert("你的浏览器不支持WebSocket！！！！");
             return false;
         }
 
-        let socketUrl = "http://192.168.1.122:8888/chat/imserver/"+$("#username").text();
+        let socketUrl = "http://10.30.10.193:8888/chat/imserver/" + $("#username").text();
         socketUrl = socketUrl.replace("https", "ws").replace("http", "ws");
         console.log(socketUrl);
-        if(socket!=null){
+        if (socket != null) {
             socket.close();
-            socket=null;
+            socket = null;
         }
 
         //建立连接
         socket = new WebSocket(socketUrl);
 
         //打开事件
-        socket.onopen = function() {
+        socket.onopen = function () {
             console.log("websocket已打开");
             //socket.send("这是来自客户端的消息" + location.href + new Date());
             let name = $("#username").text();
 
             //群发用户上线提醒
             let obj = {
-                "msgType":"ONLINE",
+                "msgType": "ONLINE",
                 "userName": name
             }
             socket.send(JSON.stringify(obj));
+            // 开启心跳检测
+            heartCheck.start();
         };
 
         //获得消息事件
-        socket.onmessage = function(msg) {
+        socket.onmessage = function (msg) {
             let data = JSON.parse(msg.data);
             //消息类型（上线，下线，群聊，单聊）
             let msgType = data.msgType;
@@ -135,7 +138,7 @@
             //上线
             if (msgType == "ONLINE") {
                 let onlineUsers = data.onlineUsers;
-                for (let user of onlineUsers){
+                for (let user of onlineUsers) {
                     Onlineset.add(user);
                 }
                 maintainUserList();
@@ -151,32 +154,35 @@
             if (msgType == "GROUP_CHAT") {
                 let style = "alert-success";//其他人消息样式
                 let image = "other";
-                if(data.userName==$("#username").text()) {
+                if (data.userName == $("#username").text()) {
                     //消息来自自己，改变样式
-                    style="alert-info";
-                    image="myself";
+                    style = "alert-info";
+                    image = "myself";
                 }
-                let message="<li class='meida alert "+style+" ' role='alert'><div class='media-left'><img src='./image/"+image+".jpg' width='30px'"+
-                    "style='margin-top: 40%' alt='' class='media-object img-circle '>"+
-                    "</div><div class='media-body '><h6 class='meida-heading text-warning '>"+data.userName+
-                    "&nbsp;&nbsp;"+data.sendTime+"</h6>"+"<p ><xmp>"+data.contentText+"</xmp></p></div></li>";
+                let message = "<li class='meida alert " + style + " ' role='alert'><div class='media-left'><img src='./image/" + image + ".jpg' width='30px'" +
+                    "style='margin-top: 40%' alt='' class='media-object img-circle '>" +
+                    "</div><div class='media-body '><h6 class='meida-heading text-warning '>" + data.userName +
+                    "&nbsp;&nbsp;" + data.sendTime + "</h6>" + "<p ><xmp>" + data.contentText + "</xmp></p></div></li>";
 
                 $("#messageList").prepend(message);
             }
 
             //单聊
-            if( msgType == "SINGLE_CHAT") {
+            if (msgType == "SINGLE_CHAT") {
 
             }
+
+            //心跳检测重置
+            heartCheck.start();
         };
 
         //关闭事件
-        socket.onclose = function() {
+        socket.onclose = function () {
             console.log("websocket已关闭");
         };
 
         //发生了错误事件
-        socket.onerror = function() {
+        socket.onerror = function () {
             console.log("websocket发生了错误");
         }
     }
@@ -186,32 +192,32 @@
      */
     function maintainUserList() {
         // 维护用户列表
-        let listnameset="<div class='list-group-item active'>"+
+        let listnameset = "<div class='list-group-item active'>" +
             "<h4 class='list-group-item-heading'>聊天室成员</h4></div>";
         $("#userlist").html(listnameset);
         Onlineset.forEach(function (item) {
-            if(item.toString()!=""){
-                let content = "<div class='list-group-item ' ondblclick='userDbClick(\""+item.toString()+"\")'>"+
-                    "<h4 class='list-group-item-heading' id='userH'>"+
-                    "<span class='glyphicon glyphicon-user'></span >"+item.toString()+"</h4></div>";
+            if (item.toString() != "") {
+                let content = "<div class='list-group-item ' ondblclick='userDbClick(\"" + item.toString() + "\")'>" +
+                    "<h4 class='list-group-item-heading' id='userH'>" +
+                    "<span class='glyphicon glyphicon-user'></span >" + item.toString() + "</h4></div>";
 
                 $("#userlist").append(content);
                 //添加在线用户到列表中
             }
         });
         //维护在线用户结束
-        return ;
+
     }
 
     //用户双击事件
-    function userDbClick(val){
+    function userDbClick(val) {
         alert(val);
     }
 
-    $("#sendMessage").bind("click", function() {
-        if(typeof(WebSocket) == "undefined") {
+    $("#sendMessage").bind("click", function () {
+        if (typeof (WebSocket) == "undefined") {
             console.log("您的浏览器不支持WebSocket");
-        }else {
+        } else {
             //定义发送消息对象
             let obj = {
                 "msgType": "GROUP_CHAT",
@@ -223,10 +229,10 @@
             $("#navbar-collapse").collapse('hide');//手机响应式下拉菜单隐藏
         }
     });
-    $('#chat').bind('keypress',function(event){
-        if(event.keyCode == "13")//回车提交
+    $('#chat').bind('keypress', function (event) {
+        if (event.keyCode == "13")//回车提交
         {
-            let name=$("#username").text();
+            let name = $("#username").text();
             //定义发送消息对象
             let obj = {
                 "msgType": "GROUP_CHAT",
@@ -241,38 +247,75 @@
     });
 
 
-    $(function(){
+    $(function () {
         // 先输入名字
         $("#myModal").modal('show');
         $("#newname").focus();
+
+        //
+        let userName = localStorage.getItem("userName");
+        if (typeof userName != "undefined" && userName != null && userName != "") {
+            $("#newname").val(userName);
+        }
+
     });
 
-    function clean(){//清空屏幕
+    function clean() {//清空屏幕
         $("#messageList").html("");
         $("#chat").val("");
         $("#navbar-collapse").collapse('hide');
     }
 
-    function savename(){// 保存名字
-        if(/[.*<|>.*]|.{9}/.test($("#newname").val())||$("#newname").val()==""){
+    function savename() {// 保存名字
+        if (/[.*<|>.*]|.{9}/.test($("#newname").val()) || $("#newname").val() == "") {
             $("[data-toggle='popover']").popover('show');
-            return ;
+            return;
         }
         $("#username").text($("#newname").val());
         $('#myModal').modal('hide');
         $("[data-toggle='popover']").popover('hide');
         openSocket();//进入核心模块
+
+        // 写入缓存
+        localStorage.userName = $("#newname").val();
     }
+
     // 名字框绑定提示信息事件
-    $("#newname").focus(function(event) {
+    $("#newname").focus(function (event) {
         $("[data-toggle='popover']").popover('show');
-    }).blur(function(event) {
+    }).blur(function (event) {
         $("[data-toggle='popover']").popover('hide');
-    }).hover(function() {
+    }).hover(function () {
         $("[data-toggle='popover']").popover('show');
-    }, function() {
+    }, function () {
         $("[data-toggle='popover']").popover('hide');
     });
+
+
+    //心跳检测
+    var heartCheck = {
+        //每隔几秒测试一下心跳是否在继续
+        timeout: 10000,
+        timeoutObj: null,
+        serverTimeoutObj: null,
+        start: function () {
+            var self = this;
+            this.timeoutObj && clearTimeout(this.timeoutObj);
+            this.serverTimeoutObj && clearTimeout(this.serverTimeoutObj);
+            this.timeoutObj = setTimeout(function () {
+                //这里发送一个心跳，后端收到后，返回一个心跳消息，
+                //任意发一个消息过去，后台接收，在init()中的onmessage收到消息，说明后台没有挂掉，有心跳
+                socket.send("{\"msgType\":\"HEART_CHECK\"}");
+                self.serverTimeoutObj = setTimeout(function () {
+                    console.log("后台挂掉，没有心跳了....");
+                    alert("后台挂掉，没有心跳了....");
+                    socket.close();
+                    // createWebSocket();
+                }, self.timeout);
+
+            }, this.timeout)
+        }
+    };
 </script>
 </body>
 </html>
