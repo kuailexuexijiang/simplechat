@@ -10,6 +10,7 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -114,7 +115,8 @@ public class WebSocketServer {
                     //追加发送人信息
                     jsonObject.put("fromUserId", userId);
                     //追加发送时间
-                    jsonObject.put("sendTime", LocalDateTime.now());
+                    jsonObject.put("sendTime", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                            .format(LocalDateTime.now()));
                     //消息类型为上线
                     if (Constant.MSG_TYPE_ONLINE.equals(msgType)) {
                         //群发给所有在线人员当前在线信息
@@ -164,7 +166,8 @@ public class WebSocketServer {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("msgType", Constant.MSG_TYPE_GROUP_CHAT);
         jsonObject.put("userName", userId);
-        jsonObject.put("sendTime", LocalDateTime.now());
+        jsonObject.put("sendTime", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                .format(LocalDateTime.now()));
         String greetMsg = "";
 
         if (Constant.MSG_TYPE_ONLINE.equals(msgType)) {
