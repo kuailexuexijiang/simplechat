@@ -92,6 +92,8 @@
 </div>
 <script th:src="@{/js/jquery-1.11.3.min.js}"></script>
 <script th:src="@{/js/bootstrap.min.js}"></script>
+<script src="https://static.runoob.com/assets/jquery/jquery.growl/javascripts/jquery.growl.js" type="text/javascript"></script>
+<link href="https://static.runoob.com/assets/jquery/jquery.growl/stylesheets/jquery.growl.css" rel="stylesheet" type="text/css" />
 <script th:inline="javascript">
     let socket;
     let Onlineset = new Set();//维护在线人数的容器
@@ -218,6 +220,11 @@
         if (typeof (WebSocket) == "undefined") {
             console.log("您的浏览器不支持WebSocket");
         } else {
+            if ($("#chat").val() == "") {
+                return $.growl.warning({
+                    message: "消息不能为空!"
+                });
+            }
             //定义发送消息对象
             let obj = {
                 "msgType": "GROUP_CHAT",
